@@ -1,15 +1,22 @@
 import Stripe from "stripe";
 import { db } from "./db";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2025-03-31.basil" as Stripe.LatestApiVersion,
-});
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key || key === "sk_test_placeholder") {
+    throw new Error("Stripe is not configured");
+  }
+  return new Stripe(key, {
+    apiVersion: "2025-03-31.basil" as Stripe.LatestApiVersion,
+  });
+}
 
 export async function createCheckoutSession(
   userId: string,
   courseId: string,
   productId: string,
 ): Promise<string> {
+  const stripe = getStripe();
   const [user, product] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: userId } }),
     db.product.findUniqueOrThrow({
@@ -43,6 +50,7 @@ export async function handleWebhookEvent(
   body: string,
   signature: string,
 ): Promise<Stripe.Event> {
+  const stripe = getStripe();
   return stripe.webhooks.constructEvent(
     body,
     signature,
@@ -51,6 +59,7 @@ export async function handleWebhookEvent(
 }
 
 export async function createRefund(paymentId: string): Promise<Stripe.Refund> {
+  const stripe = getStripe();
   const payment = await db.payment.findUniqueOrThrow({
     where: { id: paymentId },
   });
@@ -63,6 +72,7 @@ export async function createRefund(paymentId: string): Promise<Stripe.Refund> {
 export async function getCustomerPortalUrl(
   stripeCustomerId: string,
 ): Promise<string> {
+  const stripe = getStripe();
   const session = await stripe.billingPortal.sessions.create({
     customer: stripeCustomerId,
     return_url: `${process.env.NEXT_PUBLIC_APP_URL}/learn`,
