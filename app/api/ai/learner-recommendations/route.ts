@@ -2,24 +2,28 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { getLearnerRecommendations } from "@/lib/ai";
 import { logEvent, RECOMMENDATION_VIEWED } from "@/lib/activity";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 
-let ratelimit: Ratelimit | null = null;
-if (
-  process.env.UPSTASH_REDIS_REST_URL &&
-  process.env.UPSTASH_REDIS_REST_URL !== "https://placeholder.upstash.io"
-) {
-  ratelimit = new Ratelimit({
-    redis: Redis.fromEnv(),
-    limiter: Ratelimit.slidingWindow(10, "1 m"),
-  });
+function getRatelimit() {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  if (!url || url.includes("placeholder")) return null;
+  try {
+    // Dynamic import to avoid build-time validation
+    const { Ratelimit } = require("@upstash/ratelimit");
+    const { Redis } = require("@upstash/redis");
+    return new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(10, "1 m"),
+    });
+  } catch {
+    return null;
+  }
 }
 
 export async function POST() {
   try {
     const user = await getCurrentUser();
 
+    const ratelimit = getRatelimit();
     if (ratelimit) {
       const { success } = await ratelimit.limit(user.id);
       if (!success) {
