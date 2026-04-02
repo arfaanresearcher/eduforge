@@ -8,6 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ProgressBar } from "@/components/learning/ProgressBar";
 import { Clock, BookOpen, CheckCircle2, ChevronRight } from "lucide-react";
+import type { Module, Lesson } from "@prisma/client";
+
+type ModuleWithLessons = Module & { lessons: Lesson[] };
 
 export default async function CourseDetailPage({
   params,
@@ -42,8 +45,8 @@ export default async function CourseDetailPage({
     }
   }
 
-  const totalLessons = course.modules.reduce(
-    (sum: number, m: { lessons: unknown[] }) => sum + m.lessons.length,
+  const totalLessons = (course.modules as ModuleWithLessons[]).reduce(
+    (sum: number, m: ModuleWithLessons) => sum + m.lessons.length,
     0,
   );
 
@@ -93,14 +96,14 @@ export default async function CourseDetailPage({
           <div>
             <h2 className="text-xl font-semibold mb-4">Curriculum</h2>
             <div className="space-y-4">
-              {course.modules.map((module) => (
+              {(course.modules as ModuleWithLessons[]).map((module: ModuleWithLessons) => (
                 <Card key={module.id}>
                   <CardContent className="p-4">
                     <h3 className="font-semibold mb-3">
                       Module {module.order}: {module.title}
                     </h3>
                     <div className="space-y-1">
-                      {module.lessons.map((lesson) => (
+                      {module.lessons.map((lesson: Lesson) => (
                         <Link
                           key={lesson.id}
                           href={
@@ -181,7 +184,7 @@ export default async function CourseDetailPage({
                 <>
                   <Separator />
                   <div className="flex flex-wrap gap-1">
-                    {course.tags.map((tag) => (
+                    {course.tags.map((tag: string) => (
                       <Badge key={tag} variant="secondary" className="text-xs">
                         {tag}
                       </Badge>
