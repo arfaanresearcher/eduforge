@@ -1,6 +1,21 @@
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
-import { BookOpen, Hammer, LayoutDashboard } from "lucide-react";
+import { BookOpen, Hammer, LayoutDashboard, User } from "lucide-react";
+
+const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+const isClerkConfigured = clerkKey && !clerkKey.includes("placeholder");
+
+async function UserSection() {
+  if (!isClerkConfigured) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <User className="h-4 w-4" />
+        <span>Guest</span>
+      </div>
+    );
+  }
+  const { UserButton } = await import("@clerk/nextjs");
+  return <UserButton />;
+}
 
 export default function DashboardLayout({
   children,
@@ -27,7 +42,7 @@ export default function DashboardLayout({
           </NavLink>
         </nav>
         <div className="p-4 border-t">
-          <UserButton />
+          <UserSection />
         </div>
       </aside>
       <main className="flex-1 overflow-auto">{children}</main>
