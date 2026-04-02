@@ -1,8 +1,7 @@
-import { db } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
+import { getMockCourses, getMockEnrollments } from "@/lib/mock-data";
 import { CourseCard } from "@/components/learning/CourseCard";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 export default async function LearnPage({
   searchParams,
@@ -10,38 +9,50 @@ export default async function LearnPage({
   searchParams: Promise<{ type?: string; level?: string; search?: string }>;
 }) {
   const sp = await searchParams;
-  const { userId: clerkId } = await auth();
 
-  const where: Record<string, unknown> = { published: true };
-  if (sp.type) where.type = sp.type;
-  if (sp.level) where.level = sp.level;
-  if (sp.search) {
-    where.OR = [
-      { title: { contains: sp.search, mode: "insensitive" } },
-      { description: { contains: sp.search, mode: "insensitive" } },
-    ];
-  }
-
-  const courses = await db.course.findMany({
-    where,
-    include: {
-      _count: { select: { enrollments: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
+  let courses;
   let enrollments: Record<string, number> = {};
-  if (clerkId) {
-    const dbUser = await db.user.findUnique({ where: { clerkId } });
-    if (dbUser) {
-      const userEnrollments = await db.enrollment.findMany({
-        where: { userId: dbUser.id },
-      });
-      enrollments = Object.fromEntries(
-        userEnrollments.map((e) => [e.courseId, e.progress]),
-      );
+
+  try {
+    const { db } = await import("@/lib/db");
+    const { auth } = await import("@clerk/nextjs/server");
+    const { userId: clerkId } = await auth();
+
+    const where: Record<string, unknown> = { published: true };
+    if (sp.type) where.type = sp.type;
+    if (sp.level) where.level = sp.level;
+    if (sp.search) {
+      where.OR = [
+        { title: { contains: sp.search, mode: "insensitive" } },
+        { description: { contains: sp.search, mode: "insensitive" } },
+      ];
     }
+
+    courses = await db.course.findMany({
+      where,
+      include: {
+        _count: { select: { enrollments: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (clerkId) {
+      const dbUser = await db.user.findUnique({ where: { clerkId } });
+      if (dbUser) {
+        const userEnrollments = await db.enrollment.findMany({
+          where: { userId: dbUser.id },
+        });
+        enrollments = Object.fromEntries(
+          userEnrollments.map((e: { courseId: string; progress: number }) => [e.courseId, e.progress]),
+        );
+      }
+    }
+  } catch {
+    // DB unavailable — fall back to mock data
   }
+
+  courses = courses ?? getMockCourses({ type: sp.type, level: sp.level, search: sp.search });
+  enrollments = Object.keys(enrollments).length > 0 ? enrollments : getMockEnrollments();
 
   const types = ["ALL", "DIPLOMA", "SHORT_COURSE", "CERTIFICATION"];
   const levels = ["ALL", "BEGINNER", "INTERMEDIATE", "ADVANCED"];
@@ -49,7 +60,7 @@ export default async function LearnPage({
   return (
     <div className="p-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Learning Hub</h1>
+        <h1 className="text-3xl font-bold gradient-text">Learning Hub</h1>
         <p className="text-muted-foreground mt-1">
           Explore courses and build your skills
         </p>
@@ -61,6 +72,7 @@ export default async function LearnPage({
             name="search"
             placeholder="Search courses..."
             defaultValue={sp.search ?? ""}
+            className="glass border-white/10"
           />
         </form>
 
@@ -76,7 +88,7 @@ export default async function LearnPage({
                     ? "default"
                     : "secondary"
                 }
-                className="cursor-pointer"
+                className="cursor-pointer neon-border"
               >
                 {t.replace("_", " ")}
               </Badge>
@@ -96,7 +108,7 @@ export default async function LearnPage({
                     ? "default"
                     : "outline"
                 }
-                className="cursor-pointer"
+                className="cursor-pointer neon-border"
               >
                 {l}
               </Badge>
@@ -124,7 +136,7 @@ export default async function LearnPage({
       </div>
 
       {courses.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="text-center py-12 text-muted-foreground glass rounded-xl p-8">
           No courses found matching your filters.
         </div>
       )}

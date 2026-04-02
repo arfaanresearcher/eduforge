@@ -32,6 +32,12 @@ const LEVEL_COLORS: Record<string, string> = {
   ADVANCED: "bg-red-100 text-red-800",
 };
 
+const TYPE_GRADIENTS: Record<string, string> = {
+  DIPLOMA: "from-purple-500/20 to-violet-500/20",
+  SHORT_COURSE: "from-cyan-500/20 to-blue-500/20",
+  CERTIFICATION: "from-emerald-500/20 to-green-500/20",
+};
+
 export function CourseCard({
   slug,
   title,
@@ -45,12 +51,15 @@ export function CourseCard({
   userProgress,
 }: CourseCardProps) {
   const isEnrolled = userProgress !== null && userProgress !== undefined;
+  const gradient = TYPE_GRADIENTS[type] ?? "from-slate-500/20 to-slate-400/20";
 
   return (
     <Link href={`/learn/${slug}`}>
-      <Card className="h-full hover:shadow-md transition-shadow group cursor-pointer">
-        <div className="h-40 bg-gradient-to-br from-slate-100 to-slate-200 rounded-t-lg flex items-center justify-center">
-          <span className="text-4xl font-bold text-slate-300 group-hover:text-slate-400 transition-colors">
+      <Card className="h-full glass neon-border hover:shadow-md transition-shadow group cursor-pointer">
+        <div
+          className={`h-40 bg-gradient-to-br ${gradient} rounded-t-lg flex items-center justify-center`}
+        >
+          <span className="text-4xl font-bold text-white/40 group-hover:text-white/60 transition-colors">
             {title.charAt(0)}
           </span>
         </div>
@@ -95,7 +104,7 @@ export function CourseCard({
               <Progress value={userProgress} className="h-2" />
             </div>
           ) : (
-            <span className="text-lg font-bold">${price}</span>
+            <span className="text-lg font-bold gradient-text">${price}</span>
           )}
         </CardFooter>
       </Card>

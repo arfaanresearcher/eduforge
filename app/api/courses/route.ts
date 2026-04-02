@@ -1,20 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
-import { Role, CourseType, CourseLevel } from "@prisma/client";
+import { getMockCourses } from "@/lib/mock-data";
 
 export async function GET(req: NextRequest) {
   try {
+    const { db } = await import("@/lib/db");
+
     const url = new URL(req.url);
-    const type = url.searchParams.get("type") as CourseType | null;
-    const level = url.searchParams.get("level") as CourseLevel | null;
+    const type = url.searchParams.get("type");
+    const level = url.searchParams.get("level");
     const search = url.searchParams.get("search");
     const tags = url.searchParams.get("tags");
+    const slug = url.searchParams.get("slug");
 
     const where: Record<string, unknown> = { published: true };
 
     if (type) where.type = type;
     if (level) where.level = level;
+    if (slug) where.slug = slug;
     if (search) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
@@ -30,7 +32,10 @@ export async function GET(req: NextRequest) {
       include: {
         _count: { select: { enrollments: true } },
         modules: {
-          include: { _count: { select: { lessons: true } } },
+          include: {
+            lessons: { orderBy: { order: "asc" } },
+            _count: { select: { lessons: true } },
+          },
           orderBy: { order: "asc" },
         },
       },
@@ -39,15 +44,28 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ courses });
   } catch (error) {
-    console.error("Courses list error:", error);
-    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+    console.error("Courses list error (falling back to mock):", error);
+    const url = new URL(req.url);
+    const type = url.searchParams.get("type") ?? undefined;
+    const level = url.searchParams.get("level") ?? undefined;
+    const search = url.searchParams.get("search") ?? undefined;
+    const slug = url.searchParams.get("slug") ?? undefined;
+
+    let courses = getMockCourses({ type, level, search });
+    if (slug) {
+      courses = courses.filter((c) => c.slug === slug);
+    }
+    return NextResponse.json({ courses });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
+    const { db } = await import("@/lib/db");
+    const { getCurrentUser } = await import("@/lib/auth");
+
     const user = await getCurrentUser();
-    if (user.role !== Role.ADMIN) {
+    if (user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

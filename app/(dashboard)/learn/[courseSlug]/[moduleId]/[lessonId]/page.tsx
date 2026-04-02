@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { QuizBlock } from "@/components/learning/QuizBlock";
+import {
+  getMockCourseBySlug,
+  getMockLesson,
+  type MockModule,
+  type MockLesson,
+} from "@/lib/mock-data";
 import {
   CheckCircle2,
   ChevronLeft,
@@ -17,29 +23,6 @@ import {
   Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface Lesson {
-  id: string;
-  title: string;
-  content: string;
-  videoUrl?: string;
-  duration?: number;
-  hasQuiz: boolean;
-  quizData?: { questions: Array<{ q: string; options: string[]; correct: number; explanation: string }> };
-}
-
-interface Module {
-  id: string;
-  title: string;
-  order: number;
-  lessons: Lesson[];
-}
-
-interface Course {
-  slug: string;
-  title: string;
-  modules: Module[];
-}
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -52,36 +35,91 @@ export default function LessonPage() {
   const moduleId = params.moduleId as string;
   const lessonId = params.lessonId as string;
 
-  const [course, setCourse] = useState<Course | null>(null);
-  const [lesson, setLesson] = useState<Lesson | null>(null);
+  const mockCourse = useMemo(() => getMockCourseBySlug(courseSlug), [courseSlug]);
+  const mockLesson = useMemo(
+    () => getMockLesson(courseSlug, moduleId, lessonId),
+    [courseSlug, moduleId, lessonId],
+  );
+
+  const [course, setCourse] = useState(
+    mockCourse
+      ? {
+          slug: mockCourse.slug,
+          title: mockCourse.title,
+          modules: mockCourse.modules.map((m: MockModule) => ({
+            id: m.id,
+            title: m.title,
+            order: m.order,
+            lessons: m.lessons.map((l: MockLesson) => ({
+              id: l.id,
+              title: l.title,
+              content: l.content,
+              videoUrl: l.videoUrl,
+              duration: l.duration,
+              hasQuiz: l.hasQuiz,
+              quizData: l.quizData,
+            })),
+          })),
+        }
+      : null,
+  );
+
+  const [lesson, setLesson] = useState(
+    mockLesson
+      ? {
+          id: mockLesson.id,
+          title: mockLesson.title,
+          content: mockLesson.content,
+          videoUrl: mockLesson.videoUrl,
+          duration: mockLesson.duration,
+          hasQuiz: mockLesson.hasQuiz,
+          quizData: mockLesson.quizData,
+        }
+      : null,
+  );
+
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [completed, setCompleted] = useState(false);
 
+  // Try fetching from API as well (will succeed if DB is available)
   useEffect(() => {
     fetch(`/api/courses?slug=${courseSlug}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.courses?.[0]) {
-          setCourse(data.courses[0]);
-          const mod = data.courses[0].modules?.find(
-            (m: Module) => m.id === moduleId,
+          const apiCourse = data.courses[0];
+          setCourse({
+            slug: apiCourse.slug,
+            title: apiCourse.title,
+            modules: apiCourse.modules ?? [],
+          });
+          const mod = apiCourse.modules?.find(
+            (m: { id: string }) => m.id === moduleId,
           );
-          const les = mod?.lessons?.find((l: Lesson) => l.id === lessonId);
-          setLesson(les ?? null);
+          const les = mod?.lessons?.find(
+            (l: { id: string }) => l.id === lessonId,
+          );
+          if (les) setLesson(les);
         }
       })
-      .catch(console.error);
+      .catch(() => {
+        // API unavailable — keep using mock data
+      });
   }, [courseSlug, moduleId, lessonId]);
 
   const handleMarkComplete = useCallback(async () => {
-    await fetch(`/api/courses/${courseSlug}/progress`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lessonId, completed: !completed }),
-    });
+    try {
+      await fetch(`/api/courses/${courseSlug}/progress`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lessonId, completed: !completed }),
+      });
+    } catch {
+      // Silently fail if API unavailable
+    }
     setCompleted((c) => !c);
   }, [courseSlug, lessonId, completed]);
 
@@ -129,11 +167,20 @@ export default function LessonPage() {
               };
               return updated;
             });
-          } catch {}
+          } catch {
+            // skip malformed chunks
+          }
         }
       }
     } catch (error) {
       console.error("Chat error:", error);
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "AI tutor is currently unavailable. Please try again later.",
+        },
+      ]);
     } finally {
       setChatLoading(false);
     }
@@ -161,9 +208,9 @@ export default function LessonPage() {
 
   return (
     <div className="flex h-full">
-      {/* Left sidebar — course nav */}
-      <aside className="w-64 border-r overflow-y-auto bg-muted/20 hidden lg:block">
-        <div className="p-4 border-b">
+      {/* Left sidebar -- course nav */}
+      <aside className="w-64 border-r border-white/10 overflow-y-auto glass hidden lg:block">
+        <div className="p-4 border-b border-white/10">
           <Link
             href={`/learn/${courseSlug}`}
             className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
@@ -203,10 +250,10 @@ export default function LessonPage() {
       {/* Main content */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto p-8 space-y-6">
-          <h1 className="text-2xl font-bold">{lesson.title}</h1>
+          <h1 className="text-2xl font-bold gradient-text">{lesson.title}</h1>
 
           {lesson.videoUrl && (
-            <div className="aspect-video rounded-lg overflow-hidden bg-black">
+            <div className="aspect-video rounded-lg overflow-hidden bg-black glass">
               <iframe
                 src={lesson.videoUrl}
                 className="w-full h-full"
@@ -215,19 +262,25 @@ export default function LessonPage() {
             </div>
           )}
 
-          <div className="prose prose-slate max-w-none">
-            {lesson.content.split("\n").map((paragraph, i) => (
-              <p key={i}>{paragraph}</p>
-            ))}
-          </div>
+          <Card className="glass">
+            <CardContent className="p-6">
+              <div className="prose prose-slate dark:prose-invert max-w-none">
+                {lesson.content.split("\n").map((paragraph, i) => (
+                  <p key={i}>{paragraph}</p>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           {lesson.hasQuiz && lesson.quizData?.questions && (
             <>
               <Separator />
-              <div>
-                <h2 className="text-lg font-semibold mb-4">Lesson Quiz</h2>
-                <QuizBlock questions={lesson.quizData.questions} />
-              </div>
+              <Card className="glass neon-border">
+                <CardContent className="p-6">
+                  <h2 className="text-lg font-semibold mb-4">Lesson Quiz</h2>
+                  <QuizBlock questions={lesson.quizData.questions} />
+                </CardContent>
+              </Card>
             </>
           )}
 
@@ -271,14 +324,14 @@ export default function LessonPage() {
       {/* AI Chat panel */}
       <div
         className={cn(
-          "border-l bg-muted/20 flex flex-col transition-all",
+          "border-l border-white/10 glass flex flex-col transition-all",
           chatOpen ? "w-80" : "w-0",
         )}
       >
         {chatOpen && (
           <>
-            <div className="p-3 border-b flex items-center justify-between">
-              <span className="font-semibold text-sm">AI Tutor</span>
+            <div className="p-3 border-b border-white/10 flex items-center justify-between">
+              <span className="font-semibold text-sm gradient-text">AI Tutor</span>
               <Button
                 variant="ghost"
                 size="sm"
@@ -300,20 +353,20 @@ export default function LessonPage() {
                     "text-sm rounded-lg px-3 py-2 max-w-[90%]",
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground ml-auto"
-                      : "bg-muted",
+                      : "glass",
                   )}
                 >
                   {msg.content}
                 </div>
               ))}
             </div>
-            <div className="p-3 border-t flex gap-2">
+            <div className="p-3 border-t border-white/10 flex gap-2">
               <input
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendChat()}
                 placeholder="Ask a question..."
-                className="flex-1 text-sm px-3 py-2 rounded-md border bg-background"
+                className="flex-1 text-sm px-3 py-2 rounded-md border border-white/10 glass bg-transparent"
               />
               <Button size="sm" onClick={sendChat} disabled={chatLoading}>
                 <Send className="h-4 w-4" />
@@ -327,7 +380,7 @@ export default function LessonPage() {
       {!chatOpen && (
         <button
           onClick={() => setChatOpen(true)}
-          className="fixed bottom-6 right-6 bg-primary text-primary-foreground rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow"
+          className="fixed bottom-6 right-6 bg-primary text-primary-foreground rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow neon-border"
         >
           <MessageSquare className="h-5 w-5" />
         </button>
