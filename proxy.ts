@@ -1,19 +1,33 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const isProtectedRoute = createRouteMatcher([
-  "/learn(.*)",
-  "/playground(.*)",
-  "/admin(.*)",
-  "/api/ai(.*)",
-  "/api/sandbox(.*)",
-  "/api/courses(.*)",
-]);
+const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+const isClerkConfigured = clerkKey && !clerkKey.includes("placeholder");
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
+export default async function proxy(req: NextRequest) {
+  if (!isClerkConfigured) {
+    return NextResponse.next();
   }
-});
+
+  const { clerkMiddleware, createRouteMatcher } = await import(
+    "@clerk/nextjs/server"
+  );
+
+  const isProtectedRoute = createRouteMatcher([
+    "/learn(.*)",
+    "/playground(.*)",
+    "/admin(.*)",
+    "/api/ai(.*)",
+    "/api/sandbox(.*)",
+    "/api/courses(.*)",
+  ]);
+
+  return clerkMiddleware(async (auth, request) => {
+    if (isProtectedRoute(request)) {
+      await auth.protect();
+    }
+  })(req, {} as never);
+}
 
 export const config = {
   matcher: [

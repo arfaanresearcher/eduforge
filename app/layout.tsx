@@ -9,21 +9,28 @@ export const metadata: Metadata = {
   description: "Master new skills and build prototypes with AI-powered guidance.",
 };
 
+const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+const isClerkConfigured = clerkKey && !clerkKey.includes("placeholder");
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning className="h-full antialiased">
-        <body className="min-h-full flex flex-col font-sans">
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
-            <Toaster />
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+  const content = (
+    <html lang="en" suppressHydrationWarning className="h-full antialiased">
+      <body className="min-h-full flex flex-col font-sans">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </body>
+    </html>
   );
+
+  if (isClerkConfigured) {
+    return <ClerkProvider>{content}</ClerkProvider>;
+  }
+
+  return content;
 }
