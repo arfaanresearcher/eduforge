@@ -43,7 +43,7 @@ export default async function CourseDetailPage({
   }
 
   const totalLessons = course.modules.reduce(
-    (sum, m) => sum + m.lessons.length,
+    (sum: number, m: { lessons: unknown[] }) => sum + m.lessons.length,
     0,
   );
 
