@@ -8,9 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ProgressBar } from "@/components/learning/ProgressBar";
 import { Clock, BookOpen, CheckCircle2, ChevronRight } from "lucide-react";
-import type { Module, Lesson } from "@prisma/client";
-
-type ModuleWithLessons = Module & { lessons: Lesson[] };
+type SLesson = { id: string; title: string; duration: number | null; hasQuiz: boolean; order: number };
+type SModule = { id: string; title: string; order: number; lessons: SLesson[] };
 
 export default async function CourseDetailPage({
   params,
@@ -45,8 +44,8 @@ export default async function CourseDetailPage({
     }
   }
 
-  const totalLessons = (course.modules as ModuleWithLessons[]).reduce(
-    (sum: number, m: ModuleWithLessons) => sum + m.lessons.length,
+  const totalLessons = (course.modules as SModule[]).reduce(
+    (sum: number, m: SModule) => sum + m.lessons.length,
     0,
   );
 
@@ -96,14 +95,14 @@ export default async function CourseDetailPage({
           <div>
             <h2 className="text-xl font-semibold mb-4">Curriculum</h2>
             <div className="space-y-4">
-              {(course.modules as ModuleWithLessons[]).map((module: ModuleWithLessons) => (
+              {(course.modules as SModule[]).map((module: SModule) => (
                 <Card key={module.id}>
                   <CardContent className="p-4">
                     <h3 className="font-semibold mb-3">
                       Module {module.order}: {module.title}
                     </h3>
                     <div className="space-y-1">
-                      {module.lessons.map((lesson: Lesson) => (
+                      {module.lessons.map((lesson: SLesson) => (
                         <Link
                           key={lesson.id}
                           href={
