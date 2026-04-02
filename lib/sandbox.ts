@@ -1,16 +1,5 @@
-import Docker from "dockerode";
 import { db } from "./db";
 import { SandboxStatus } from "@prisma/client";
-
-let docker: Docker | null = null;
-let dockerAvailable = false;
-
-try {
-  docker = new Docker();
-  dockerAvailable = true;
-} catch {
-  console.warn("Docker daemon not available. Sandbox features will use mock responses.");
-}
 
 const IMAGES: Record<string, string> = {
   node: "node:20-alpine",
@@ -25,15 +14,28 @@ function getImage(techStack: string[]): string {
   return IMAGES.node;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function getDocker(): Promise<any | null> {
+  if (process.env.VERCEL || process.env.NEXT_RUNTIME === "edge") return null;
+  try {
+    const Docker = (await import("dockerode")).default;
+    const docker = new Docker();
+    await docker.ping();
+    return docker;
+  } catch {
+    return null;
+  }
+}
+
 export async function createSandbox(
   userId: string,
   prototypeId: string,
   techStack: string[],
 ): Promise<{ sandboxId: string; containerId: string }> {
   const image = getImage(techStack);
+  const docker = await getDocker();
 
-  if (!docker || !dockerAvailable) {
-    console.warn("Docker not available, returning mock sandbox.");
+  if (!docker) {
     const sandbox = await db.sandbox.create({
       data: {
         prototypeId,
@@ -84,7 +86,9 @@ export async function executeCode(
     where: { id: sandboxId },
   });
 
-  if (!docker || !dockerAvailable || sandbox.containerId?.startsWith("mock-")) {
+  const docker = await getDocker();
+
+  if (!docker || sandbox.containerId?.startsWith("mock-")) {
     return {
       stdout: `[Mock] Executed ${language} code (${code.length} chars)\nOutput: Hello from EduForge sandbox`,
       stderr: "",
@@ -117,7 +121,8 @@ export async function executeCode(
       resolve({ stdout: "", stderr: "Execution timed out", exitCode: 124 });
     }, timeoutMs);
 
-    exec.start({ Tty: false }, (err, stream) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    exec.start({ Tty: false }, (err: any, stream: any) => {
       if (err || !stream) {
         clearTimeout(timeout);
         resolve({ stdout: "", stderr: err?.message ?? "Failed to start exec", exitCode: 1 });
@@ -136,7 +141,7 @@ export async function executeCode(
 
       stream.on("end", () => {
         clearTimeout(timeout);
-        exec.inspect().then((info) => {
+        exec.inspect().then((info: { ExitCode?: number }) => {
           resolve({ stdout, stderr, exitCode: info.ExitCode ?? 0 });
         }).catch(() => {
           resolve({ stdout, stderr, exitCode: 0 });
@@ -151,7 +156,9 @@ export async function destroySandbox(sandboxId: string): Promise<void> {
     where: { id: sandboxId },
   });
 
-  if (docker && dockerAvailable && sandbox.containerId && !sandbox.containerId.startsWith("mock-")) {
+  const docker = await getDocker();
+
+  if (docker && sandbox.containerId && !sandbox.containerId.startsWith("mock-")) {
     try {
       const container = docker.getContainer(sandbox.containerId);
       await container.stop().catch(() => {});
@@ -174,7 +181,9 @@ export async function getSandboxStatus(
     where: { id: sandboxId },
   });
 
-  if (!docker || !dockerAvailable || sandbox.containerId?.startsWith("mock-")) {
+  const docker = await getDocker();
+
+  if (!docker || sandbox.containerId?.startsWith("mock-")) {
     return { status: sandbox.status, containerId: sandbox.containerId };
   }
 
