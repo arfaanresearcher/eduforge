@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EduForge
 
-## Getting Started
+AI-powered digital learning and prototyping platform. EduForge combines structured course delivery (diplomas, short courses, certifications) with an interactive prototyping playground, powered by Claude AI for personalized recommendations and real-time tutoring.
 
-First, run the development server:
+## Prerequisites
+
+- **Node.js** 20+ and npm
+- **Docker** (for sandbox code execution)
+- **PostgreSQL** database (Neon recommended)
+
+## Quick Start
+
+### 1. Clone and install
+
+```bash
+git clone <repo-url>
+cd eduforge
+npm install
+```
+
+### 2. Configure environment
+
+```bash
+cp .env.example .env.local
+```
+
+### 3. Get API keys
+
+| Service | Where to get it | Variable(s) |
+|---------|----------------|-------------|
+| **Neon PostgreSQL** | [neon.tech](https://neon.tech) - New Project - Connection string | `DATABASE_URL`, `DIRECT_URL` |
+| **Clerk Auth** | [dashboard.clerk.com](https://dashboard.clerk.com) - Create App - API Keys | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `CLERK_WEBHOOK_SECRET` |
+| **Anthropic Claude** | [console.anthropic.com](https://console.anthropic.com) - API Keys | `ANTHROPIC_API_KEY` |
+| **Pinecone** | [app.pinecone.io](https://app.pinecone.io) - Create Index (dim: 1536, cosine) | `PINECONE_API_KEY`, `PINECONE_INDEX`, `PINECONE_HOST` |
+| **AWS S3** | AWS Console - IAM - Create User with S3FullAccess | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET` |
+| **Stripe** | [dashboard.stripe.com](https://dashboard.stripe.com) - Developers - API Keys | `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET` |
+| **Upstash Redis** | [console.upstash.com](https://console.upstash.com) - Create Database - REST API | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` |
+
+### 4. Set up the database
+
+```bash
+npx prisma generate
+npx prisma db push
+npx prisma db seed
+```
+
+Or use the setup script:
+
+```bash
+chmod +x scripts/setup-db.sh
+./scripts/setup-db.sh
+```
+
+### 5. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 6. Docker sandbox (optional)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Ensure Docker Desktop is running. The sandbox service starts containers on-demand when users execute code in the playground.
 
-## Learn More
+```bash
+docker info
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+eduforge/
+├── app/
+│   ├── (dashboard)/        # Authenticated routes
+│   ├── api/                # Route handlers
+│   ├── layout.tsx          # Root layout
+│   └── page.tsx            # Landing page
+├── components/
+│   ├── learning/           # Course, lesson, quiz components
+│   ├── playground/         # Code editor, terminal, file tree
+│   └── ui/                 # shadcn/ui components
+├── lib/                    # Core utilities (ai, auth, db, sandbox, etc.)
+├── prisma/                 # Schema and seed data
+└── scripts/                # Setup scripts
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech Stack
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Framework:** Next.js (App Router)
+- **Auth:** Clerk
+- **Database:** PostgreSQL via Prisma
+- **AI:** Anthropic Claude
+- **Vector Search:** Pinecone
+- **Storage:** AWS S3
+- **Payments:** Stripe
+- **Rate Limiting:** Upstash Redis
+- **Sandboxing:** Docker
+- **UI:** Tailwind CSS, shadcn/ui, Radix
+- **Code Editor:** Monaco Editor
