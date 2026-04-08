@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { getMockCourseBySlug, type MockCourse } from "@/lib/mock-data";
 
-type Tab = "chat" | "study-guide" | "flashcards" | "notebooklm";
+type Tab = "chat" | "study-guide" | "flashcards" | "documents" | "notebooklm";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -38,6 +38,13 @@ export default function NotebookPage() {
   const [flashcardIndex, setFlashcardIndex] = useState(0);
   const [flashcardFlipped, setFlashcardFlipped] = useState(false);
   const [flashcardsLoading, setFlashcardsLoading] = useState(false);
+
+  // Documents state
+  const [docResult, setDocResult] = useState<string>("");
+  const [docFileName, setDocFileName] = useState<string>("");
+  const [docLoading, setDocLoading] = useState(false);
+  const [docAction, setDocAction] = useState<string>("summarize");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const c = getMockCourseBySlug(courseSlug);
@@ -119,6 +126,29 @@ export default function NotebookPage() {
     }
   }
 
+  // --- Document Upload ---
+  async function handleDocUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setDocLoading(true);
+    setDocFileName(file.name);
+    setDocResult("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("action", docAction);
+      const res = await fetch("/api/notebooklm/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setDocResult(data.result);
+    } catch (err) {
+      setDocResult(`Error: ${err instanceof Error ? err.message : "Upload failed"}`);
+    } finally {
+      setDocLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
   // --- Render helpers ---
   function renderFormattedText(text: string) {
     return text.split("\n").map((line, i) => {
@@ -145,6 +175,7 @@ export default function NotebookPage() {
     { id: "chat", label: "AI Chat" },
     { id: "study-guide", label: "Study Guide" },
     { id: "flashcards", label: "Flashcards" },
+    { id: "documents", label: "Documents" },
     { id: "notebooklm", label: "NotebookLM" },
   ];
 
@@ -560,7 +591,140 @@ export default function NotebookPage() {
       )}
 
       {/* ════════════════════════════════════════════ */}
-      {/* TAB 4: NotebookLM                           */}
+      {/* TAB 4: Documents                             */}
+      {/* ════════════════════════════════════════════ */}
+      {activeTab === "documents" && (
+        <div className="space-y-6">
+          {/* Upload Area */}
+          <div
+            className="glass neon-border rounded-2xl p-6 space-y-5"
+            style={{ border: "1px solid rgba(42,136,153,0.2)" }}
+          >
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9956F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="12" y1="18" x2="12" y2="12" />
+                <line x1="9" y1="15" x2="15" y2="15" />
+              </svg>
+              Upload &amp; Analyze Document
+            </h2>
+            <p className="text-sm text-white/60">
+              Upload any PDF, DOCX, TXT, or MD file and let AI analyze it for you.
+            </p>
+
+            {/* Action Selector */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: "summarize", label: "Summarize" },
+                { id: "study-guide", label: "Study Guide" },
+                { id: "flashcards", label: "Flashcards" },
+                { id: "key-points", label: "Key Points" },
+                { id: "explain", label: "Explain Simply" },
+              ].map((action) => (
+                <button
+                  key={action.id}
+                  onClick={() => setDocAction(action.id)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  style={{
+                    background: docAction === action.id
+                      ? "linear-gradient(135deg, #C9956F, #a87a55)"
+                      : "rgba(255,255,255,0.05)",
+                    color: docAction === action.id ? "#fff" : "rgba(255,255,255,0.6)",
+                    border: docAction === action.id
+                      ? "1px solid rgba(201,149,111,0.4)"
+                      : "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Drop Zone */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="rounded-xl p-8 text-center cursor-pointer transition-all hover:border-opacity-40"
+              style={{
+                border: "2px dashed rgba(42,136,153,0.3)",
+                background: "rgba(42,136,153,0.05)",
+              }}
+              onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const file = e.dataTransfer.files[0];
+                if (file && fileInputRef.current) {
+                  const dt = new DataTransfer();
+                  dt.items.add(file);
+                  fileInputRef.current.files = dt.files;
+                  fileInputRef.current.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+              }}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.txt,.md,.csv"
+                onChange={handleDocUpload}
+                className="hidden"
+              />
+              <svg className="mx-auto mb-3" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2A8899" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <p className="text-white/80 font-medium">
+                {docLoading ? "Processing..." : "Click or drop a file here"}
+              </p>
+              <p className="text-xs text-white/40 mt-1">
+                PDF, DOCX, TXT, MD, CSV — up to 10MB
+              </p>
+            </div>
+
+            {/* Loading */}
+            {docLoading && (
+              <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: "rgba(42,136,153,0.1)", border: "1px solid rgba(42,136,153,0.2)" }}>
+                <div className="animate-spin h-5 w-5 rounded-full border-2 border-white/20" style={{ borderTopColor: "#C9956F" }} />
+                <span className="text-sm text-white/70">Analyzing <strong className="text-white/90">{docFileName}</strong>...</span>
+              </div>
+            )}
+          </div>
+
+          {/* Results */}
+          {docResult && !docLoading && (
+            <div
+              className="glass neon-border rounded-2xl p-6 space-y-4"
+              style={{ border: "1px solid rgba(201,149,111,0.2)" }}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C9956F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  {docFileName}
+                </h3>
+                <button
+                  onClick={() => { setDocResult(""); setDocFileName(""); }}
+                  className="text-xs px-3 py-1 rounded-lg text-white/50 hover:text-white/80"
+                  style={{ background: "rgba(255,255,255,0.05)" }}
+                >
+                  Clear
+                </button>
+              </div>
+              <div
+                className="rounded-xl p-5 text-sm text-white/80 leading-relaxed overflow-auto max-h-[600px]"
+                style={{ background: "rgba(13,59,69,0.5)", border: "1px solid rgba(42,136,153,0.1)" }}
+              >
+                {renderFormattedText(docResult)}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* TAB 5: NotebookLM                           */}
       {/* ════════════════════════════════════════════ */}
       {activeTab === "notebooklm" && (
         <div
