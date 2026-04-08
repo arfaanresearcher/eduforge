@@ -19,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageSquare,
+  NotebookPen,
   X,
   Send,
 } from "lucide-react";
@@ -376,14 +377,26 @@ export default function LessonPage() {
         )}
       </div>
 
-      {/* Chat toggle button */}
+      {/* Chat toggle button & Notebook link */}
       {!chatOpen && (
-        <button
-          onClick={() => setChatOpen(true)}
-          className="fixed bottom-6 right-6 bg-primary text-primary-foreground rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow neon-border"
-        >
-          <MessageSquare className="h-5 w-5" />
-        </button>
+        <div className="fixed bottom-6 right-6 flex flex-col gap-3">
+          <Link href={`/learn/${courseSlug}/notebook`}>
+            <button
+              className="bg-primary text-primary-foreground rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow neon-border"
+              title="AI Notebook"
+              style={{ background: '#185C6B' }}
+            >
+              <NotebookPen className="h-5 w-5" />
+            </button>
+          </Link>
+          <button
+            onClick={() => setChatOpen(true)}
+            className="bg-primary text-primary-foreground rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow neon-border"
+            title="AI Tutor"
+          >
+            <MessageSquare className="h-5 w-5" />
+          </button>
+        </div>
       )}
     </div>
   );

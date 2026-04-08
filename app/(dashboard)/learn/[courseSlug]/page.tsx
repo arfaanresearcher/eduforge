@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ProgressBar } from "@/components/learning/ProgressBar";
-import { Clock, BookOpen, CheckCircle2, ChevronRight } from "lucide-react";
+import { Clock, BookOpen, CheckCircle2, ChevronRight, NotebookPen } from "lucide-react";
 
 type SLesson = { id: string; title: string; duration: number | null; hasQuiz: boolean; order: number };
 type SModule = { id: string; title: string; order: number; lessons: SLesson[] };
@@ -205,6 +205,13 @@ export default async function CourseDetailPage({
                   </Button>
                 </Link>
               )}
+
+              <Link href={`/learn/${courseSlug}/notebook`}>
+                <Button className="w-full mt-2" variant="outline" size="lg" style={{ borderColor: '#2A8899', color: '#2A8899' }}>
+                  <NotebookPen className="h-4 w-4 mr-2" />
+                  AI Notebook
+                </Button>
+              </Link>
 
               <div className="text-3xl font-bold gradient-text">${course.price}</div>
 

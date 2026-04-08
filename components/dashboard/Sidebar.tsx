@@ -2,11 +2,12 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, Hammer, LayoutDashboard, User, Rocket, Sparkles } from "lucide-react";
+import { BookOpen, Hammer, LayoutDashboard, User, Rocket, Sparkles, NotebookPen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/learn", icon: BookOpen, label: "Learning Hub" },
+  { href: "/learn/ai-machine-learning-fundamentals/notebook", icon: NotebookPen, label: "AI Notebooks" },
   { href: "/playground", icon: Hammer, label: "Playground" },
   { href: "/admin", icon: LayoutDashboard, label: "Admin Panel" },
   { href: "/profile", icon: User, label: "Profile" },
