@@ -21,9 +21,9 @@ interface CourseCardProps {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  DIPLOMA: "bg-purple-100 text-purple-800",
-  SHORT_COURSE: "bg-blue-100 text-blue-800",
-  CERTIFICATION: "bg-green-100 text-green-800",
+  DIPLOMA: "bg-[#185C6B]/10 text-[#185C6B]",
+  SHORT_COURSE: "bg-[#C9956F]/10 text-[#A87B55]",
+  CERTIFICATION: "bg-[#2A8899]/10 text-[#2A8899]",
 };
 
 const LEVEL_COLORS: Record<string, string> = {
@@ -33,9 +33,15 @@ const LEVEL_COLORS: Record<string, string> = {
 };
 
 const TYPE_GRADIENTS: Record<string, string> = {
-  DIPLOMA: "from-purple-500/20 to-violet-500/20",
-  SHORT_COURSE: "from-cyan-500/20 to-blue-500/20",
-  CERTIFICATION: "from-emerald-500/20 to-green-500/20",
+  DIPLOMA: "",
+  SHORT_COURSE: "",
+  CERTIFICATION: "",
+};
+
+const TYPE_INLINE_GRADIENTS: Record<string, string> = {
+  DIPLOMA: "linear-gradient(to bottom right, rgba(24,92,107,0.2), rgba(13,59,69,0.2))",
+  SHORT_COURSE: "linear-gradient(to bottom right, rgba(201,149,111,0.2), rgba(168,123,85,0.2))",
+  CERTIFICATION: "linear-gradient(to bottom right, rgba(42,136,153,0.2), rgba(24,92,107,0.2))",
 };
 
 export function CourseCard({
@@ -51,13 +57,14 @@ export function CourseCard({
   userProgress,
 }: CourseCardProps) {
   const isEnrolled = userProgress !== null && userProgress !== undefined;
-  const gradient = TYPE_GRADIENTS[type] ?? "from-slate-500/20 to-slate-400/20";
+  const inlineGradient = TYPE_INLINE_GRADIENTS[type] ?? "linear-gradient(to bottom right, rgba(24,92,107,0.2), rgba(201,149,111,0.2))";
 
   return (
     <Link href={`/learn/${slug}`}>
       <Card className="h-full glass neon-border hover:shadow-md transition-shadow group cursor-pointer">
         <div
-          className={`h-40 bg-gradient-to-br ${gradient} rounded-t-lg flex items-center justify-center`}
+          className="h-40 rounded-t-lg flex items-center justify-center"
+          style={{ background: inlineGradient }}
         >
           <span className="text-4xl font-bold text-white/40 group-hover:text-white/60 transition-colors">
             {title.charAt(0)}

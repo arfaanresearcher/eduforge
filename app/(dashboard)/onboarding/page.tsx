@@ -42,9 +42,10 @@ export default function OnboardingPage() {
             key={i}
             className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
               i <= step
-                ? "bg-gradient-to-r from-cyan-500 to-purple-600"
+                ? ""
                 : "bg-white/10"
             }`}
+            style={i <= step ? { background: 'linear-gradient(to right, #185C6B, #C9956F)' } : {}}
           />
         ))}
       </div>
@@ -54,7 +55,7 @@ export default function OnboardingPage() {
         {/* Step 1: Welcome */}
         {step === 0 && (
           <div className="text-center">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-purple-600">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'linear-gradient(to bottom right, #185C6B, #C9956F)' }}>
               <Sparkles className="h-8 w-8 text-white" />
             </div>
             <h1 className="mb-2 text-3xl font-bold">Welcome to EduForge</h1>
@@ -78,9 +79,10 @@ export default function OnboardingPage() {
                   onClick={() => toggleTag(tag)}
                   className={`rounded-full border px-5 py-2.5 text-sm font-medium transition-all ${
                     selectedTags.includes(tag)
-                      ? "border-cyan-500/50 bg-cyan-500/15 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                      ? "shadow-[0_0_12px_rgba(24,92,107,0.2)]"
                       : "border-white/10 bg-white/5 text-muted-foreground hover:bg-white/10"
                   }`}
+                  style={selectedTags.includes(tag) ? { borderColor: 'rgba(24,92,107,0.5)', backgroundColor: 'rgba(24,92,107,0.15)', color: '#2A8899' } : {}}
                 >
                   {selectedTags.includes(tag) && <Check className="mr-1.5 inline h-3.5 w-3.5" />}
                   {tag}
@@ -104,12 +106,13 @@ export default function OnboardingPage() {
                   onClick={() => setSelectedCourse(course.id)}
                   className={`flex w-full items-start gap-4 rounded-xl border p-4 text-left transition-all ${
                     selectedCourse === course.id
-                      ? "border-cyan-500/50 bg-cyan-500/10"
+                      ? ""
                       : "border-white/10 bg-white/5 hover:bg-white/10"
                   }`}
+                  style={selectedCourse === course.id ? { borderColor: 'rgba(24,92,107,0.5)', backgroundColor: 'rgba(24,92,107,0.1)' } : {}}
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500/20 to-purple-600/20">
-                    <BookOpen className="h-5 w-5 text-cyan-400" />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg" style={{ background: 'linear-gradient(to bottom right, rgba(24,92,107,0.2), rgba(201,149,111,0.2))' }}>
+                    <BookOpen className="h-5 w-5" style={{ color: '#2A8899' }} />
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-semibold">{course.title}</h3>
@@ -126,7 +129,7 @@ export default function OnboardingPage() {
                     </div>
                   </div>
                   {selectedCourse === course.id && (
-                    <Check className="ml-auto mt-1 h-5 w-5 shrink-0 text-cyan-400" />
+                    <Check className="ml-auto mt-1 h-5 w-5 shrink-0" style={{ color: '#2A8899' }} />
                   )}
                 </button>
               ))}
@@ -147,12 +150,13 @@ export default function OnboardingPage() {
             {/* Confetti-like decorative dots */}
             <div className="relative mx-auto mb-6 h-8 w-48">
               {[
-                "bg-cyan-400", "bg-purple-500", "bg-pink-400", "bg-green-400",
-                "bg-yellow-400", "bg-blue-400", "bg-orange-400", "bg-emerald-400",
+                "#185C6B", "#C9956F", "#2A8899", "#0D3B45",
+                "#F5F0EB", "#185C6B", "#C9956F", "#2A8899",
               ].map((color, i) => (
                 <div
                   key={i}
-                  className={`absolute h-2 w-2 rounded-full ${color} animate-pulse`}
+                  className="absolute h-2 w-2 rounded-full animate-pulse"
+                  style={{ backgroundColor: color }}
                   style={{
                     left: `${(i / 8) * 100}%`,
                     top: `${Math.sin(i * 0.8) * 12 + 12}px`,
@@ -163,7 +167,8 @@ export default function OnboardingPage() {
             </div>
             <button
               onClick={() => router.push("/learn")}
-              className="rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 px-8 py-3 text-sm font-semibold text-white transition-all hover:shadow-[0_0_24px_rgba(6,182,212,0.4)]"
+              className="rounded-xl px-8 py-3 text-sm font-semibold text-white transition-all hover:shadow-[0_0_24px_rgba(201,149,111,0.4)]"
+              style={{ background: 'linear-gradient(to right, #C9956F, #A87B55)' }}
             >
               Start Learning
             </button>
@@ -189,9 +194,10 @@ export default function OnboardingPage() {
               key={i}
               className={`h-2 rounded-full transition-all duration-300 ${
                 i === step
-                  ? "w-6 bg-gradient-to-r from-cyan-500 to-purple-600"
+                  ? "w-6"
                   : "w-2 bg-white/20"
               }`}
+              style={i === step ? { background: 'linear-gradient(to right, #185C6B, #C9956F)' } : {}}
             />
           ))}
         </div>

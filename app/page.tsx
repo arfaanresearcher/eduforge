@@ -193,7 +193,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 glass-strong">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <GraduationCap className="h-7 w-7 text-cyan-400" />
+            <GraduationCap className="h-7 w-7" style={{ color: '#2A8899' }} />
             <span className="text-xl font-bold gradient-text">EduForge</span>
           </Link>
 
@@ -228,7 +228,7 @@ export default function HomePage() {
               </Button>
             </Link>
             <Link href="/sign-up">
-              <Button className="bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400 text-white border-0 glow-sm">
+              <Button className="text-white border-0 glow-sm" style={{ background: 'linear-gradient(135deg, #C9956F, #A87B55)' }}>
                 Get Started
               </Button>
             </Link>
@@ -240,15 +240,16 @@ export default function HomePage() {
         {/* ===== HERO ===== */}
         <section className="relative overflow-hidden">
           {/* Background gradient orbs */}
-          <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-br from-cyan-500/20 via-violet-500/15 to-pink-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-[-100px] right-[-200px] w-[400px] h-[400px] bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full blur-3xl pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(42, 136, 153, 0.2), rgba(201, 149, 111, 0.15), rgba(24, 92, 107, 0.1))' }} />
+          <div className="absolute bottom-[-100px] right-[-200px] w-[400px] h-[400px] rounded-full blur-3xl pointer-events-none" style={{ background: 'rgba(201, 149, 111, 0.1)' }} />
 
           <div className="relative max-w-7xl mx-auto px-6 pt-24 pb-20 text-center space-y-8">
             <Badge
               variant="outline"
-              className="glass border-cyan-500/30 text-cyan-300 px-4 py-1.5 text-sm"
+              className="glass px-4 py-1.5 text-sm"
+              style={{ borderColor: 'rgba(42, 136, 153, 0.3)', color: '#3BA5B5' }}
             >
-              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+              <Sparkles className="h-3.5 w-3.5 mr-1.5" style={{ color: '#C9956F' }} />
               Powered by AI
             </Badge>
 
@@ -268,7 +269,8 @@ export default function HomePage() {
               <Link href="/learn">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400 text-white border-0 glow-md text-base px-8 py-6 animate-gradient"
+                  className="text-white border-0 glow-md text-base px-8 py-6 animate-gradient"
+                  style={{ background: 'linear-gradient(135deg, #C9956F, #A87B55)' }}
                 >
                   <BookOpen className="h-5 w-5 mr-2" />
                   Explore Courses
@@ -279,7 +281,8 @@ export default function HomePage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="glass border-white/10 text-white hover:bg-white/5 hover:border-white/20 text-base px-8 py-6"
+                  className="glass text-white hover:bg-white/5 text-base px-8 py-6"
+                  style={{ borderColor: 'rgba(42, 136, 153, 0.3)' }}
                 >
                   <Hammer className="h-5 w-5 mr-2" />
                   Start Building
@@ -312,7 +315,8 @@ export default function HomePage() {
             <div className="text-center space-y-4 mb-16">
               <Badge
                 variant="outline"
-                className="glass border-violet-500/30 text-violet-300 px-4 py-1.5 text-sm"
+                className="glass px-4 py-1.5 text-sm"
+                style={{ borderColor: 'rgba(201, 149, 111, 0.3)', color: '#C9956F' }}
               >
                 Features
               </Badge>
@@ -333,8 +337,8 @@ export default function HomePage() {
                   className="glass neon-border rounded-2xl bg-transparent"
                 >
                   <CardContent className="p-8 space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 flex items-center justify-center">
-                      <feature.icon className="h-6 w-6 text-cyan-400" />
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #185C6B, #2A8899)' }}>
+                      <feature.icon className="h-6 w-6 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold text-white">
                       {feature.title}
@@ -351,12 +355,13 @@ export default function HomePage() {
 
         {/* ===== POPULAR COURSES ===== */}
         <section id="courses" className="py-24 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-500/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, rgba(201, 149, 111, 0.05), transparent)' }} />
           <div className="relative max-w-7xl mx-auto px-6">
             <div className="text-center space-y-4 mb-16">
               <Badge
                 variant="outline"
-                className="glass border-cyan-500/30 text-cyan-300 px-4 py-1.5 text-sm"
+                className="glass px-4 py-1.5 text-sm"
+                style={{ borderColor: 'rgba(42, 136, 153, 0.3)', color: '#3BA5B5' }}
               >
                 Popular Courses
               </Badge>
@@ -379,10 +384,11 @@ export default function HomePage() {
                     <div className="flex items-center justify-between">
                       <Badge
                         variant="outline"
-                        className={
+                        className="border-0"
+                        style={
                           course.type === "DIPLOMA"
-                            ? "border-violet-500/40 text-violet-300 bg-violet-500/10"
-                            : "border-cyan-500/40 text-cyan-300 bg-cyan-500/10"
+                            ? { borderWidth: '1px', borderStyle: 'solid', borderColor: 'rgba(42, 136, 153, 0.4)', color: '#3BA5B5', backgroundColor: 'rgba(42, 136, 153, 0.1)' }
+                            : { borderWidth: '1px', borderStyle: 'solid', borderColor: 'rgba(201, 149, 111, 0.4)', color: '#C9956F', backgroundColor: 'rgba(201, 149, 111, 0.1)' }
                         }
                       >
                         {course.type === "DIPLOMA"
@@ -406,7 +412,8 @@ export default function HomePage() {
                       <Link href={`/learn/${course.slug}`}>
                         <Button
                           variant="ghost"
-                          className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 group-hover:translate-x-1 transition-transform"
+                          className="hover:bg-transparent group-hover:translate-x-1 transition-transform"
+                          style={{ color: '#3BA5B5' }}
                         >
                           View Course
                           <ArrowRight className="h-4 w-4 ml-1" />
@@ -426,7 +433,8 @@ export default function HomePage() {
             <div className="text-center space-y-4 mb-16">
               <Badge
                 variant="outline"
-                className="glass border-pink-500/30 text-pink-300 px-4 py-1.5 text-sm"
+                className="glass px-4 py-1.5 text-sm"
+                style={{ borderColor: 'rgba(201, 149, 111, 0.3)', color: '#C9956F' }}
               >
                 How It Works
               </Badge>
@@ -438,13 +446,13 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
               {/* Connecting line (visible on md+) */}
-              <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-[2px] bg-gradient-to-r from-cyan-500/40 via-violet-500/40 to-pink-500/40" />
+              <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-[2px]" style={{ background: 'linear-gradient(to right, rgba(42, 136, 153, 0.4), rgba(201, 149, 111, 0.4), rgba(24, 92, 107, 0.4))' }} />
 
               {steps.map((step) => (
                 <div key={step.number} className="text-center space-y-4">
-                  <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 glow-sm mx-auto">
-                    <step.icon className="h-7 w-7 text-cyan-400" />
-                    <span className="absolute -top-2 -right-2 text-xs font-bold text-violet-300 bg-violet-500/20 rounded-full w-6 h-6 flex items-center justify-center border border-violet-500/30">
+                  <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl glow-sm mx-auto" style={{ background: 'linear-gradient(135deg, rgba(42, 136, 153, 0.2), rgba(201, 149, 111, 0.2))' }}>
+                    <step.icon className="h-7 w-7" style={{ color: '#3BA5B5' }} />
+                    <span className="absolute -top-2 -right-2 text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center" style={{ color: '#C9956F', backgroundColor: 'rgba(201, 149, 111, 0.2)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'rgba(201, 149, 111, 0.3)' }}>
                       {step.number}
                     </span>
                   </div>
@@ -462,12 +470,13 @@ export default function HomePage() {
 
         {/* ===== PRICING ===== */}
         <section id="pricing" className="py-24 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, transparent, rgba(42, 136, 153, 0.05), transparent)' }} />
           <div className="relative max-w-7xl mx-auto px-6">
             <div className="text-center space-y-4 mb-16">
               <Badge
                 variant="outline"
-                className="glass border-cyan-500/30 text-cyan-300 px-4 py-1.5 text-sm"
+                className="glass px-4 py-1.5 text-sm"
+                style={{ borderColor: 'rgba(42, 136, 153, 0.3)', color: '#3BA5B5' }}
               >
                 Pricing
               </Badge>
@@ -493,7 +502,7 @@ export default function HomePage() {
                 >
                   {plan.highlighted && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-gradient-to-r from-cyan-500 to-violet-500 text-white border-0 px-4 py-1">
+                      <Badge className="text-white border-0 px-4 py-1" style={{ background: 'linear-gradient(135deg, #C9956F, #A87B55)' }}>
                         Most Popular
                       </Badge>
                     </div>
@@ -521,7 +530,7 @@ export default function HomePage() {
                           key={feature}
                           className="flex items-center gap-3 text-sm text-white/60"
                         >
-                          <Check className="h-4 w-4 text-cyan-400 shrink-0" />
+                          <Check className="h-4 w-4 shrink-0" style={{ color: '#3BA5B5' }} />
                           {feature}
                         </li>
                       ))}
@@ -530,9 +539,10 @@ export default function HomePage() {
                       <Button
                         className={`w-full ${
                           plan.highlighted
-                            ? "bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400 text-white border-0"
+                            ? "text-white border-0"
                             : "glass border-white/10 text-white hover:bg-white/5"
                         }`}
+                        style={plan.highlighted ? { background: 'linear-gradient(135deg, #C9956F, #A87B55)' } : undefined}
                       >
                         {plan.cta}
                         <ArrowRight className="h-4 w-4 ml-2" />
@@ -551,7 +561,8 @@ export default function HomePage() {
             <div className="text-center space-y-4 mb-16">
               <Badge
                 variant="outline"
-                className="glass border-violet-500/30 text-violet-300 px-4 py-1.5 text-sm"
+                className="glass px-4 py-1.5 text-sm"
+                style={{ borderColor: 'rgba(201, 149, 111, 0.3)', color: '#C9956F' }}
               >
                 Testimonials
               </Badge>
@@ -579,7 +590,7 @@ export default function HomePage() {
                       &ldquo;{t.quote}&rdquo;
                     </p>
                     <div className="flex items-center gap-3 pt-2">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500/30 to-violet-500/30 flex items-center justify-center text-sm font-semibold text-white/80 border border-white/10">
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-white/80 border border-white/10" style={{ background: 'linear-gradient(135deg, rgba(42, 136, 153, 0.3), rgba(201, 149, 111, 0.3))' }}>
                         {t.initials}
                       </div>
                       <div>
@@ -601,7 +612,7 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto px-6">
             <div className="relative rounded-3xl overflow-hidden p-12 sm:p-16 text-center space-y-6">
               {/* CTA gradient background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 via-violet-500/20 to-pink-500/20 animate-gradient" />
+              <div className="absolute inset-0 animate-gradient" style={{ background: 'linear-gradient(135deg, rgba(42, 136, 153, 0.2), rgba(24, 92, 107, 0.2), rgba(13, 59, 69, 0.2))' }} />
               <div className="absolute inset-0 glass-strong" />
 
               <div className="relative space-y-6">
@@ -616,7 +627,8 @@ export default function HomePage() {
                 <Link href="/sign-up">
                   <Button
                     size="lg"
-                    className="bg-gradient-to-r from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400 text-white border-0 glow-md text-base px-10 py-6 mt-4"
+                    className="text-white border-0 glow-md text-base px-10 py-6 mt-4"
+                    style={{ background: 'linear-gradient(135deg, #C9956F, #A87B55)' }}
                   >
                     Get Started for Free
                     <ArrowRight className="h-5 w-5 ml-2" />
@@ -733,7 +745,7 @@ export default function HomePage() {
 
           <div className="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-cyan-400" />
+              <GraduationCap className="h-5 w-5" style={{ color: '#2A8899' }} />
               <span className="text-sm font-semibold gradient-text">
                 EduForge
               </span>

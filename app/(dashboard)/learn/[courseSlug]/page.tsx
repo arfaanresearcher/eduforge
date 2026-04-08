@@ -12,9 +12,15 @@ type SLesson = { id: string; title: string; duration: number | null; hasQuiz: bo
 type SModule = { id: string; title: string; order: number; lessons: SLesson[] };
 
 const HERO_GRADIENTS: Record<string, string> = {
-  DIPLOMA: "from-purple-600/30 via-violet-500/20 to-indigo-600/30",
-  SHORT_COURSE: "from-cyan-600/30 via-blue-500/20 to-sky-600/30",
-  CERTIFICATION: "from-emerald-600/30 via-green-500/20 to-teal-600/30",
+  DIPLOMA: "",
+  SHORT_COURSE: "",
+  CERTIFICATION: "",
+};
+
+const HERO_INLINE_GRADIENTS: Record<string, string> = {
+  DIPLOMA: "linear-gradient(to bottom right, rgba(24,92,107,0.3), rgba(13,59,69,0.2), rgba(24,92,107,0.3))",
+  SHORT_COURSE: "linear-gradient(to bottom right, rgba(201,149,111,0.3), rgba(168,123,85,0.2), rgba(201,149,111,0.3))",
+  CERTIFICATION: "linear-gradient(to bottom right, rgba(42,136,153,0.3), rgba(24,92,107,0.2), rgba(42,136,153,0.3))",
 };
 
 export default async function CourseDetailPage({
@@ -97,12 +103,12 @@ export default async function CourseDetailPage({
     0,
   );
 
-  const heroGradient = HERO_GRADIENTS[course.type] ?? HERO_GRADIENTS.DIPLOMA;
+  const heroInlineGradient = HERO_INLINE_GRADIENTS[course.type] ?? HERO_INLINE_GRADIENTS.DIPLOMA;
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
       {/* Hero banner */}
-      <div className={`rounded-2xl bg-gradient-to-br ${heroGradient} glass p-8 mb-8`}>
+      <div className="rounded-2xl glass p-8 mb-8" style={{ background: heroInlineGradient }}>
         <div className="flex gap-2 mb-3">
           <Badge>{course.type.replace("_", " ")}</Badge>
           <Badge variant="outline">{course.level}</Badge>

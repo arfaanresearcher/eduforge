@@ -22,25 +22,25 @@ const stats = [
     label: "Users",
     value: MOCK_ADMIN_STATS.totalUsers.toLocaleString(),
     icon: Users,
-    gradient: "from-cyan-400 to-blue-500",
+    inlineGradient: "linear-gradient(to right, #185C6B, #2A8899)",
   },
   {
     label: "Courses",
     value: MOCK_ADMIN_STATS.totalCourses.toString(),
     icon: BookOpen,
-    gradient: "from-purple-400 to-pink-500",
+    inlineGradient: "linear-gradient(to right, #C9956F, #A87B55)",
   },
   {
     label: "Enrollments",
     value: MOCK_ADMIN_STATS.activeEnrollments.toLocaleString(),
     icon: GraduationCap,
-    gradient: "from-green-400 to-emerald-500",
+    inlineGradient: "linear-gradient(to right, #2A8899, #185C6B)",
   },
   {
     label: "Revenue",
     value: `$${(MOCK_ADMIN_STATS.revenue / 1000).toFixed(0)}k`,
     icon: DollarSign,
-    gradient: "from-orange-400 to-amber-500",
+    inlineGradient: "linear-gradient(to right, #C9956F, #185C6B)",
   },
 ];
 
@@ -60,12 +60,13 @@ export default function AdminPage() {
               <div>
                 <p className="text-sm text-muted-foreground">{stat.label}</p>
                 <p
-                  className={`mt-1 text-3xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent`}
+                  className="mt-1 text-3xl font-bold bg-clip-text text-transparent"
+                  style={{ backgroundImage: stat.inlineGradient }}
                 >
                   {stat.value}
                 </p>
               </div>
-              <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${stat.gradient} opacity-20`}>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl opacity-20" style={{ backgroundImage: stat.inlineGradient }}>
                 <stat.icon className="h-6 w-6" />
               </div>
             </div>

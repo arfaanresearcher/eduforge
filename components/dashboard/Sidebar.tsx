@@ -20,7 +20,7 @@ export function Sidebar() {
     <aside className="w-64 border-r border-white/5 glass-strong flex flex-col h-full">
       <div className="p-6 border-b border-white/5">
         <Link href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center">
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #185C6B, #C9956F)' }}>
             <Sparkles className="h-4 w-4 text-white" />
           </div>
           <span className="text-xl font-bold gradient-text">EduForge</span>
@@ -50,7 +50,7 @@ export function Sidebar() {
 
       <div className="p-4 border-t border-white/5">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-sm font-bold text-white">
+          <div className="h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: 'linear-gradient(135deg, #185C6B, #C9956F)' }}>
             AR
           </div>
           <div className="flex-1 min-w-0">

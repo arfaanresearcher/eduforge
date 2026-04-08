@@ -47,14 +47,14 @@ export default function ProfilePage() {
       <div className="rounded-2xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
         <div className="flex flex-col items-center gap-6 sm:flex-row">
           {/* Avatar */}
-          <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 text-3xl font-bold text-white shadow-lg">
+          <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full text-3xl font-bold text-white shadow-lg" style={{ background: 'linear-gradient(to bottom right, #185C6B, #C9956F)' }}>
             AR
           </div>
           <div className="text-center sm:text-left">
             <h1 className="text-2xl font-bold">{MOCK_USER.name}</h1>
             <p className="text-sm text-muted-foreground">{MOCK_USER.email}</p>
             <div className="mt-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <span className="rounded-full bg-cyan-500/15 px-3 py-1 text-xs font-medium text-cyan-400">
+              <span className="rounded-full px-3 py-1 text-xs font-medium" style={{ backgroundColor: 'rgba(24,92,107,0.15)', color: '#2A8899' }}>
                 {MOCK_USER.role}
               </span>
               {MOCK_USER.careerGoal && (
@@ -91,7 +91,7 @@ export default function ProfilePage() {
           {/* Stats */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl text-center">
-              <BookOpen className="mx-auto mb-2 h-6 w-6 text-cyan-400" />
+              <BookOpen className="mx-auto mb-2 h-6 w-6" style={{ color: '#2A8899' }} />
               <p className="text-2xl font-bold">{MOCK_ENROLLMENTS.length}</p>
               <p className="text-xs text-muted-foreground">Courses Enrolled</p>
             </div>
@@ -101,7 +101,7 @@ export default function ProfilePage() {
               <p className="text-xs text-muted-foreground">Completed</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl text-center">
-              <Clock className="mx-auto mb-2 h-6 w-6 text-purple-400" />
+              <Clock className="mx-auto mb-2 h-6 w-6" style={{ color: '#C9956F' }} />
               <p className="text-2xl font-bold">{totalHours}h</p>
               <p className="text-xs text-muted-foreground">Total Hours</p>
             </div>
@@ -126,7 +126,8 @@ export default function ProfilePage() {
                     <div className="flex-1">
                       <div className="h-2 overflow-hidden rounded-full bg-white/10">
                         <div
-                          className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 transition-all"
+                          className="h-full rounded-full transition-all"
+                          style={{ background: 'linear-gradient(to right, #185C6B, #C9956F)' }}
                           style={{ width: `${enrollment.progress}%` }}
                         />
                       </div>
@@ -201,7 +202,7 @@ export default function ProfilePage() {
                 )}
                 {/* Icon */}
                 <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5">
-                  <item.icon className="h-4 w-4 text-cyan-400" />
+                  <item.icon className="h-4 w-4" style={{ color: '#2A8899' }} />
                 </div>
                 {/* Content */}
                 <div className="pt-1">

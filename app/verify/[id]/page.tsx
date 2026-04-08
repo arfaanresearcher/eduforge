@@ -11,7 +11,7 @@ export default async function VerifyCertificatePage({
   const certificate = MOCK_CERTIFICATES.find((c) => c.uniqueId === id);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 p-6">
+    <div className="flex min-h-screen items-center justify-center p-6" style={{ background: 'linear-gradient(to bottom right, #0D3B45, #0a2a32, #0D3B45)' }}>
       <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl">
         {certificate ? (
           <div className="text-center">

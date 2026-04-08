@@ -37,7 +37,7 @@ export default function SignUpPage() {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="mb-8 flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-purple-600">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'linear-gradient(to bottom right, #185C6B, #C9956F)' }}>
               <BookOpen className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold">EduForge</span>
@@ -112,9 +112,10 @@ export default function SignUpPage() {
                     onClick={() => setRole("student")}
                     className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
                       role === "student"
-                        ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
+                        ? "border-white/10 bg-white/5"
                         : "border-white/10 bg-white/5 text-muted-foreground hover:bg-white/10"
                     }`}
+                    style={role === "student" ? { borderColor: 'rgba(24,92,107,0.5)', backgroundColor: 'rgba(24,92,107,0.1)', color: '#2A8899' } : {}}
                   >
                     Student
                   </button>
@@ -123,9 +124,10 @@ export default function SignUpPage() {
                     onClick={() => setRole("company")}
                     className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
                       role === "company"
-                        ? "border-purple-500/50 bg-purple-500/10 text-purple-400"
+                        ? "border-white/10 bg-white/5"
                         : "border-white/10 bg-white/5 text-muted-foreground hover:bg-white/10"
                     }`}
+                    style={role === "company" ? { borderColor: 'rgba(201,149,111,0.5)', backgroundColor: 'rgba(201,149,111,0.1)', color: '#C9956F' } : {}}
                   >
                     Company
                   </button>
@@ -135,7 +137,8 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="relative w-full rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-[0_0_24px_rgba(6,182,212,0.4)] disabled:opacity-60"
+                className="relative w-full rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-[0_0_24px_rgba(201,149,111,0.4)] disabled:opacity-60"
+                style={{ background: 'linear-gradient(to right, #C9956F, #A87B55)' }}
               >
                 {loading ? "Creating account..." : "Create Account"}
               </button>
@@ -170,7 +173,7 @@ export default function SignUpPage() {
 
             <p className="mt-6 text-center text-sm text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/sign-in" className="font-medium text-cyan-400 hover:underline">
+              <Link href="/sign-in" className="font-medium hover:underline" style={{ color: '#C9956F' }}>
                 Sign in
               </Link>
             </p>
@@ -179,13 +182,13 @@ export default function SignUpPage() {
       </div>
 
       {/* Right side - Decorative panel (hidden on mobile) */}
-      <div className="hidden lg:flex lg:flex-1 items-center justify-center bg-gradient-to-br from-purple-600/20 via-cyan-500/20 to-pink-500/20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(147,51,234,0.15),transparent_70%)]" />
-        <div className="absolute top-1/3 left-1/3 h-64 w-64 rounded-full bg-purple-600/10 blur-3xl" />
-        <div className="absolute bottom-1/3 right-1/3 h-64 w-64 rounded-full bg-cyan-500/10 blur-3xl" />
+      <div className="hidden lg:flex lg:flex-1 items-center justify-center relative overflow-hidden" style={{ background: 'linear-gradient(to bottom right, rgba(201,149,111,0.2), rgba(24,92,107,0.2), rgba(42,136,153,0.2))' }}>
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(201,149,111,0.15), transparent 70%)' }} />
+        <div className="absolute top-1/3 left-1/3 h-64 w-64 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(201,149,111,0.1)' }} />
+        <div className="absolute bottom-1/3 right-1/3 h-64 w-64 rounded-full blur-3xl" style={{ backgroundColor: 'rgba(24,92,107,0.1)' }} />
         <div className="relative z-10 max-w-md px-12 text-center">
           <div className="mb-6 flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-cyan-500 shadow-2xl">
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl shadow-2xl" style={{ background: 'linear-gradient(to bottom right, #C9956F, #185C6B)' }}>
               <BookOpen className="h-10 w-10 text-white" />
             </div>
           </div>
