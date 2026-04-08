@@ -1,188 +1,255 @@
-// Google NotebookLM Enterprise API Client
-// Docs: https://docs.cloud.google.com/gemini/enterprise/notebooklm-enterprise/docs/api-notebooks
+// NotebookLM Integration — Free Approach
+// Uses: Gemini API free tier for AI chat + direct links to free NotebookLM consumer app
+// No paid Google Cloud subscription needed
 
-const PROJECT_NUMBER = process.env.GOOGLE_CLOUD_PROJECT_NUMBER;
-const LOCATION = process.env.GOOGLE_CLOUD_LOCATION || "us";
-const ACCESS_TOKEN = process.env.GOOGLE_CLOUD_ACCESS_TOKEN;
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-function getBaseUrl() {
-  return `https://${LOCATION}-discoveryengine.googleapis.com/v1alpha/projects/${PROJECT_NUMBER}/locations/${LOCATION}/notebooks`;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+function getGemini() {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === "placeholder") return null;
+  return new GoogleGenerativeAI(GEMINI_API_KEY);
 }
 
-function isConfigured() {
-  return !!(PROJECT_NUMBER && ACCESS_TOKEN);
-}
+// --- Gemini-powered AI Chat for course content ---
 
-async function apiCall(path: string, options: RequestInit = {}) {
-  if (!isConfigured()) {
-    throw new Error("NotebookLM API not configured");
+export async function chatWithCourseContent(
+  courseTitle: string,
+  courseContent: string,
+  userMessage: string,
+): Promise<string> {
+  const genAI = getGemini();
+
+  if (!genAI) {
+    // Demo mode — return a helpful mock response
+    return getDemoResponse(userMessage);
   }
 
-  const url = path.startsWith("http") ? path : `${getBaseUrl()}${path}`;
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${ACCESS_TOKEN}`,
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-  if (!res.ok) {
-    const error = await res.text();
-    throw new Error(`NotebookLM API error (${res.status}): ${error}`);
+  const systemPrompt = `You are an AI study assistant for the course "${courseTitle}" on EduForge, an AI-powered learning platform.
+Your role is to help students understand the course material deeply.
+
+Here is the course content to reference:
+---
+${courseContent}
+---
+
+Instructions:
+- Answer questions based on the course content above
+- Explain concepts clearly with examples
+- Generate study guides, flashcards, and practice questions when asked
+- If asked to summarize, provide concise but comprehensive summaries
+- Be encouraging and supportive in your responses`;
+
+  const result = await model.generateContent([systemPrompt, userMessage]);
+  return result.response.text();
+}
+
+// --- Generate study materials ---
+
+export async function generateStudyGuide(
+  courseTitle: string,
+  courseContent: string,
+): Promise<string> {
+  const genAI = getGemini();
+
+  if (!genAI) {
+    return getMockStudyGuide(courseTitle);
   }
 
-  return res.json();
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+  const prompt = `Create a comprehensive study guide for the course "${courseTitle}".
+
+Course content:
+${courseContent}
+
+Generate:
+1. Key Concepts Summary (bullet points)
+2. Important Definitions
+3. 5 Practice Questions with Answers
+4. Memory Aids / Mnemonics
+5. Connections Between Topics
+
+Format with clear headers and concise content.`;
+
+  const result = await model.generateContent(prompt);
+  return result.response.text();
 }
 
-// --- Core API Methods ---
+export async function generateFlashcards(
+  courseTitle: string,
+  lessonContent: string,
+  lessonTitle: string,
+): Promise<Array<{ front: string; back: string }>> {
+  const genAI = getGemini();
 
-export async function createNotebook(title: string) {
-  if (!isConfigured()) {
-    return {
-      notebookId: `mock_nb_${Date.now()}`,
-      title,
-      name: `projects/mock/locations/${LOCATION}/notebooks/mock_nb_${Date.now()}`,
-      mock: true,
-    };
+  if (!genAI) {
+    return getMockFlashcards(lessonTitle);
   }
 
-  return apiCall("", {
-    method: "POST",
-    body: JSON.stringify({ title }),
-  });
-}
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-export async function getNotebook(notebookId: string) {
-  if (!isConfigured()) {
-    return {
-      notebookId,
-      title: "Mock Notebook",
-      sources: [],
-      mock: true,
-    };
+  const prompt = `Create 8 flashcards for studying "${lessonTitle}" from the course "${courseTitle}".
+
+Lesson content:
+${lessonContent}
+
+Return ONLY a JSON array of objects with "front" (question) and "back" (answer) keys. No other text.
+Example: [{"front":"What is X?","back":"X is..."}]`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+
+  try {
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (jsonMatch) return JSON.parse(jsonMatch[0]);
+  } catch {
+    // Parse failed
   }
 
-  return apiCall(`/${notebookId}`);
+  return getMockFlashcards(lessonTitle);
 }
 
-export async function deleteNotebook(notebookId: string) {
-  if (!isConfigured()) return { mock: true };
+export async function generateQuiz(
+  courseTitle: string,
+  lessonContent: string,
+  lessonTitle: string,
+): Promise<Array<{ question: string; options: string[]; correct: number; explanation: string }>> {
+  const genAI = getGemini();
 
-  return apiCall(":batchDelete", {
-    method: "POST",
-    body: JSON.stringify({
-      names: [`projects/${PROJECT_NUMBER}/locations/${LOCATION}/notebooks/${notebookId}`],
-    }),
-  });
-}
-
-export interface TextSource {
-  type: "text";
-  sourceName: string;
-  content: string;
-}
-
-export interface WebSource {
-  type: "web";
-  url: string;
-}
-
-export type NotebookSource = TextSource | WebSource;
-
-export async function addSources(notebookId: string, sources: NotebookSource[]) {
-  if (!isConfigured()) {
-    return {
-      sources: sources.map((s, i) => ({
-        sourceId: { id: `mock_src_${i}` },
-        title: s.type === "text" ? s.sourceName : s.url,
-        settings: { status: "SOURCE_STATUS_COMPLETE" },
-      })),
-      mock: true,
-    };
+  if (!genAI) {
+    return getMockQuiz(lessonTitle);
   }
 
-  const userContents = sources.map((s) => {
-    if (s.type === "text") {
-      return { textContent: { sourceName: s.sourceName, content: s.content } };
-    }
-    return { webContent: { url: s.url } };
-  });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-  return apiCall(`/${notebookId}/sources:batchCreate`, {
-    method: "POST",
-    body: JSON.stringify({ userContents }),
-  });
-}
+  const prompt = `Create 5 multiple-choice quiz questions for "${lessonTitle}" from "${courseTitle}".
 
-export async function createAudioOverview(
-  notebookId: string,
-  episodeFocus?: string,
-  languageCode?: string,
-) {
-  if (!isConfigured()) {
-    return {
-      audioOverview: {
-        status: "AUDIO_OVERVIEW_STATUS_COMPLETE",
-        audioOverviewId: `mock_audio_${Date.now()}`,
-        mock: true,
-      },
-    };
+Lesson content:
+${lessonContent}
+
+Return ONLY a JSON array with objects: {"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}
+Where "correct" is the 0-based index. No other text.`;
+
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+
+  try {
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (jsonMatch) return JSON.parse(jsonMatch[0]);
+  } catch {
+    // Parse failed
   }
 
-  const body: Record<string, unknown> = {};
-  if (episodeFocus) body.episodeFocus = episodeFocus;
-  if (languageCode) body.languageCode = languageCode;
-
-  return apiCall(`/${notebookId}/audioOverviews`, {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
+  return getMockQuiz(lessonTitle);
 }
 
-export async function deleteAudioOverview(notebookId: string) {
-  if (!isConfigured()) return { mock: true };
+// --- NotebookLM Deep Linking (free consumer app) ---
 
-  return apiCall(`/${notebookId}/audioOverviews/default`, {
-    method: "DELETE",
-  });
+export function getNotebookLMUrl(): string {
+  return "https://notebooklm.google.com";
 }
 
-// --- Helper: Build notebook URL for web access ---
-
-export function getNotebookUrl(notebookId: string) {
-  if (!isConfigured() || notebookId.startsWith("mock_")) {
-    return "https://notebooklm.google.com";
-  }
-  return `https://notebooklm.google.com/notebook/${notebookId}`;
+export function getNotebookLMCreateUrl(): string {
+  return "https://notebooklm.google.com/new";
 }
 
-// --- Helper: Create notebook from course content ---
+// --- Download course content as text file for NotebookLM upload ---
 
-export async function createCourseNotebook(
+export function buildCourseTextForDownload(
   courseTitle: string,
   modules: Array<{ title: string; lessons: Array<{ title: string; content: string }> }>,
-) {
-  const notebook = await createNotebook(`EduForge: ${courseTitle}`);
-  const notebookId = notebook.notebookId;
+): string {
+  let text = `# ${courseTitle}\n\n`;
 
-  // Build text sources from each module's lessons
-  const sources: TextSource[] = modules.flatMap((mod) =>
-    mod.lessons.map((lesson) => ({
-      type: "text" as const,
-      sourceName: `${mod.title} — ${lesson.title}`,
-      content: lesson.content,
-    })),
-  );
+  for (const mod of modules) {
+    text += `## ${mod.title}\n\n`;
+    for (const lesson of mod.lessons) {
+      text += `### ${lesson.title}\n\n${lesson.content}\n\n---\n\n`;
+    }
+  }
 
-  // NotebookLM allows batching sources
-  const result = await addSources(notebookId, sources);
+  return text;
+}
 
-  return {
-    notebookId,
-    notebookUrl: getNotebookUrl(notebookId),
-    sourcesLoaded: result.sources?.length ?? sources.length,
-    mock: notebook.mock ?? false,
-  };
+// --- Demo/Mock Responses ---
+
+function getDemoResponse(userMessage: string): string {
+  const msg = userMessage.toLowerCase();
+
+  if (msg.includes("summary") || msg.includes("summarize")) {
+    return "**Course Summary**\n\nThis course covers fundamental concepts from mathematical foundations through practical applications. Key areas include:\n\n- **Core Theory**: Understanding the mathematical and statistical underpinnings\n- **Algorithms**: Implementation and comparison of major approaches\n- **Applications**: Real-world use cases and deployment strategies\n\nThe course emphasizes hands-on practice with guided exercises.\n\n*To get detailed AI-powered summaries, add a Gemini API key in your environment settings.*";
+  }
+
+  if (msg.includes("flashcard")) {
+    return "**Flashcards Generated**\n\n**Card 1** — Q: What is the main goal of this discipline?\nA: To enable systems to learn from data and improve performance.\n\n**Card 2** — Q: What are the three main types of learning?\nA: Supervised, unsupervised, and reinforcement learning.\n\n**Card 3** — Q: What metric evaluates classification?\nA: Precision, recall, F1-score, and AUC-ROC.\n\n*For AI-generated flashcards from your actual course content, add a free Gemini API key.*";
+  }
+
+  if (msg.includes("quiz") || msg.includes("test")) {
+    return "**Practice Quiz**\n\n1. Which technique reduces dimensionality while preserving variance?\n   a) Gradient Descent  b) **PCA**  c) K-Means  d) Decision Trees\n\n2. What does the learning rate control?\n   a) Data size  b) Model accuracy  c) **Step size in optimization**  d) Feature count\n\n*Add a Gemini API key for customized quizzes from your specific lessons.*";
+  }
+
+  return `Great question! Here's what I can share from the course material:\n\nThe topic you're asking about is covered in depth across the course modules. The key concepts involve understanding theoretical foundations and their practical applications.\n\n**To unlock full AI-powered answers:**\n1. Get a free Gemini API key at [ai.google.dev](https://ai.google.dev)\n2. Add it as \`GEMINI_API_KEY\` in your environment\n\n**Or use NotebookLM directly:**\nClick "Open in NotebookLM" to upload your course materials and chat with them using Google's free AI notebook tool.`;
+}
+
+function getMockStudyGuide(courseTitle: string): string {
+  return `# Study Guide: ${courseTitle}
+
+## Key Concepts
+- Core theoretical foundations and their practical significance
+- Algorithm selection criteria and performance tradeoffs
+- Data preprocessing and feature engineering best practices
+- Model evaluation metrics and validation strategies
+- Deployment considerations and production monitoring
+
+## Important Definitions
+- **Supervised Learning**: Learning from labeled examples
+- **Unsupervised Learning**: Finding patterns in unlabeled data
+- **Cross-Validation**: Technique for robust model evaluation
+- **Regularization**: Preventing model overfitting
+
+## Practice Questions
+1. Compare and contrast the major algorithm families covered in this course.
+2. Explain when you would choose one approach over another.
+3. Describe the complete pipeline from data to deployment.
+4. What are the key evaluation metrics and when to use each?
+5. How do you handle overfitting in practice?
+
+## Memory Aids
+- **CRISP-DM**: Business Understanding → Data → Preparation → Modeling → Evaluation → Deployment
+- Think of model complexity as a dial: too low = underfitting, too high = overfitting
+
+## Topic Connections
+The mathematical foundations connect directly to optimization algorithms, which drive model training. Evaluation metrics guide model selection, and deployment considerations shape architecture choices.
+
+---
+*Generated in demo mode. Add a Gemini API key for AI-powered study guides based on your actual course content.*`;
+}
+
+function getMockFlashcards(lessonTitle: string): Array<{ front: string; back: string }> {
+  return [
+    { front: `What is the main concept in "${lessonTitle}"?`, back: "The core concept involves understanding fundamental principles and their applications." },
+    { front: "Why is this topic important?", back: "It forms the foundation for more advanced techniques covered later in the course." },
+    { front: "What are the key takeaways?", back: "1) Understand the theory 2) Practice implementation 3) Evaluate results" },
+    { front: "How does this connect to other topics?", back: "This builds on earlier foundations and enables the advanced techniques in later modules." },
+  ];
+}
+
+function getMockQuiz(lessonTitle: string): Array<{ question: string; options: string[]; correct: number; explanation: string }> {
+  return [
+    {
+      question: `Which best describes the main focus of "${lessonTitle}"?`,
+      options: ["Data collection methods", "Core theoretical concepts", "Marketing strategies", "Hardware optimization"],
+      correct: 1,
+      explanation: "This lesson primarily focuses on understanding core theoretical concepts and their applications.",
+    },
+    {
+      question: "What is the recommended approach for beginners?",
+      options: ["Skip to advanced topics", "Start with fundamentals", "Focus only on code", "Memorize formulas"],
+      correct: 1,
+      explanation: "Starting with fundamentals builds a strong foundation for more advanced concepts.",
+    },
+  ];
 }

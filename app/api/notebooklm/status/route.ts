@@ -1,21 +1,26 @@
 import { NextResponse } from "next/server";
-import { getNotebook, getNotebookUrl } from "@/lib/notebooklm";
+import { buildCourseTextForDownload } from "@/lib/notebooklm";
+import { getMockCourseBySlug } from "@/lib/mock-data";
 
 export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const notebookId = searchParams.get("notebookId");
-    if (!notebookId) {
-      return NextResponse.json({ error: "notebookId required" }, { status: 400 });
-    }
+  const { searchParams } = new URL(request.url);
+  const courseSlug = searchParams.get("courseSlug");
 
-    const notebook = await getNotebook(notebookId);
-    return NextResponse.json({
-      ...notebook,
-      notebookUrl: getNotebookUrl(notebookId),
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to get notebook";
-    return NextResponse.json({ error: message }, { status: 500 });
+  if (!courseSlug) {
+    return NextResponse.json({ error: "courseSlug required" }, { status: 400 });
   }
+
+  const course = getMockCourseBySlug(courseSlug);
+  if (!course) {
+    return NextResponse.json({ error: "Course not found" }, { status: 404 });
+  }
+
+  const text = buildCourseTextForDownload(course.title, course.modules);
+
+  return new NextResponse(text, {
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "Content-Disposition": `attachment; filename="${course.slug}-notes.txt"`,
+    },
+  });
 }
